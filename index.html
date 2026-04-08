@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phishing Study</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #F2F0EB; --surface: #FFFFFF; --navy: #0F2137; --navy-mid: #1E3A5F;
+      --red: #C0392B; --red-light: #FDF2F1; --red-border: #E8C4C0;
+      --green: #1A7A4A; --green-light: #F0F9F4; --green-border: #A8D8BC;
+      --blue-info: #EEF4FF; --blue-border: #C0D4F7; --blue-text: #2C4A7C;
+      --text: #0F2137; --text-muted: #5A6478; --border: #DEDAD2;
+      --progress-bg: #E5E2DA; --shadow: 0 2px 16px rgba(15,33,55,0.08);
+      --radius: 12px; --font-display: 'Playfair Display', Georgia, serif;
+      --font-body: 'DM Sans', system-ui, sans-serif;
+    }
+    html, body { min-height: 100vh; background: var(--bg); font-family: var(--font-body); color: var(--text); line-height: 1.6; }
+    .screen { display: none; min-height: 100vh; padding: 48px 20px 60px; justify-content: flex-start; align-items: center; flex-direction: column; }
+    .screen.active { display: flex; animation: fadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    .container { width: 100%; max-width: 660px; }
+    .container-wide { width: 100%; max-width: 860px; }
+    h1 { font-family: var(--font-display); font-size: clamp(30px, 5.5vw, 46px); font-weight: 700; line-height: 1.15; color: var(--navy); margin-bottom: 14px; letter-spacing: -0.5px; }
+    h2 { font-family: var(--font-display); font-size: clamp(24px, 4vw, 34px); font-weight: 600; color: var(--navy); margin-bottom: 10px; letter-spacing: -0.3px; }
+    h3 { font-size: 15px; font-weight: 600; color: var(--navy); margin-bottom: 10px; }
+    p { color: var(--text-muted); font-size: 15px; margin-bottom: 10px; line-height: 1.65; }
+    p:last-child { margin-bottom: 0; }
+    a { color: var(--navy); font-weight: 600; }
+    .badge { display: inline-flex; align-items: center; gap: 7px; background: var(--navy); color: #fff; font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; padding: 5px 13px; border-radius: 100px; margin-bottom: 22px; }
+    .badge-dot { width: 6px; height: 6px; background: #4ADE80; border-radius: 50%; flex-shrink: 0; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px 28px; margin-bottom: 14px; box-shadow: var(--shadow); }
+    .card-sm { padding: 18px 22px; }
+    .consent-item { display: flex; align-items: flex-start; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+    .consent-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .consent-item:first-child { padding-top: 0; }
+    .consent-item input[type="checkbox"] { width: 18px; height: 18px; min-width: 18px; margin-top: 2px; accent-color: var(--navy); cursor: pointer; }
+    .consent-item label { font-size: 14px; color: var(--text-muted); cursor: pointer; line-height: 1.55; }
+    .btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 15px 28px; border-radius: 10px; font-family: var(--font-body); font-size: 15px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s ease; text-decoration: none; margin-top: 6px; }
+    .btn-primary { background: var(--navy); color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: var(--navy-mid); transform: translateY(-1px); box-shadow: 0 6px 24px rgba(15,33,55,0.2); }
+    .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+    .video-wrap { position: relative; width: 100%; padding-bottom: 56.25%; background: #111; border-radius: 10px; overflow: hidden; margin: 16px 0; border: 1px solid var(--border); }
+    .video-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
+    .video-notice { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--blue-info); border: 1px solid var(--blue-border); border-radius: 10px; font-size: 13.5px; color: var(--blue-text); margin-bottom: 14px; }
+    .video-notice .vc-icon { font-size: 16px; flex-shrink: 0; }
+    #video-timer-pill { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 100px; font-size: 13px; color: var(--text-muted); margin-bottom: 14px; transition: all 0.3s ease; }
+    #video-timer-pill.ready { background: var(--green-light); border-color: var(--green-border); color: var(--green); }
+    #video-countdown { font-weight: 600; color: var(--navy); }
+    .step-list { list-style: none; counter-reset: steps; }
+    .step-list li { counter-increment: steps; display: flex; align-items: flex-start; gap: 14px; padding: 13px 0; border-bottom: 1px solid var(--border); font-size: 14.5px; color: var(--text-muted); line-height: 1.55; }
+    .step-list li:last-child { border-bottom: none; padding-bottom: 0; }
+    .step-list li:first-child { padding-top: 0; }
+    .step-list li::before { content: counter(steps); min-width: 26px; height: 26px; background: var(--navy); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+    .step-list strong { color: var(--navy); font-weight: 600; }
+    .step-list li span { flex: 1; min-width: 0; }
+    .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .progress-pct { font-size: 12.5px; color: var(--text-muted); font-weight: 500; }
+    .progress-track { height: 5px; background: var(--progress-bg); border-radius: 100px; margin-bottom: 22px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--navy); border-radius: 100px; transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
+    .email-image-container { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin: 12px 0 6px; display: flex; align-items: flex-start; justify-content: center; min-height: 120px; position: relative; }
+    #email-img { width: 100%; height: auto; display: block; border-radius: 6px; cursor: zoom-in; transition: opacity 0.2s ease; }
+    #email-img:hover { opacity: 0.93; }
+    .email-img-loading { width: 100%; padding: 50px 20px; text-align: center; color: var(--text-muted); font-size: 14px; }
+    .email-img-error { padding: 30px 20px; text-align: center; color: var(--red); font-size: 13.5px; line-height: 1.5; }
+    .email-img-error strong { display: block; margin-bottom: 4px; }
+    .zoom-hint { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px; color: var(--text-muted); margin-bottom: 12px; padding: 6px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 100px; width: fit-content; cursor: pointer; transition: background 0.15s ease, border-color 0.15s ease; user-select: none; }
+    .zoom-hint:hover { background: var(--blue-info); border-color: var(--blue-border); color: var(--blue-text); }
+    #lightbox { display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(10,20,35,0.92); align-items: center; justify-content: center; padding: 24px; cursor: zoom-out; animation: lbFade 0.2s ease both; }
+    #lightbox.open { display: flex; }
+    @keyframes lbFade { from { opacity: 0; } to { opacity: 1; } }
+    #lightbox img { max-width: min(100%, 1100px); max-height: 90vh; width: auto; height: auto; border-radius: 8px; box-shadow: 0 24px 80px rgba(0,0,0,0.6); cursor: zoom-out; animation: lbScale 0.22s cubic-bezier(0.22,1,0.36,1) both; }
+    @keyframes lbScale { from { transform: scale(0.94); } to { transform: scale(1); } }
+    #lightbox-close { position: fixed; top: 18px; right: 22px; width: 38px; height: 38px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); border-radius: 50%; color: #fff; font-size: 20px; line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.15s ease; }
+    #lightbox-close:hover { background: rgba(255,255,255,0.25); }
+    .classify-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+    .btn-classify { padding: 16px 12px; border-radius: 10px; font-family: var(--font-body); font-size: 15px; font-weight: 600; cursor: pointer; border: 2px solid transparent; transition: all 0.18s ease; display: flex; flex-direction: column; align-items: center; gap: 5px; line-height: 1; }
+    .btn-classify .cls-icon { font-size: 22px; }
+    .btn-classify .cls-sub { font-size: 11.5px; font-weight: 400; opacity: 0.72; }
+    .btn-phishing { background: var(--red-light); border-color: var(--red-border); color: var(--red); }
+    .btn-phishing:hover { background: #f8dbd8; border-color: var(--red); }
+    .btn-phishing.selected { background: var(--red); color: #fff; border-color: var(--red); transform: translateY(-2px); box-shadow: 0 5px 20px rgba(192,57,43,0.28); }
+    .btn-legit { background: var(--green-light); border-color: var(--green-border); color: var(--green); }
+    .btn-legit:hover { background: #daeee5; border-color: var(--green); }
+    .btn-legit.selected { background: var(--green); color: #fff; border-color: var(--green); transform: translateY(-2px); box-shadow: 0 5px 20px rgba(26,122,74,0.28); }
+    .confidence-section { display: none; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); animation: fadeUp 0.25s ease both; }
+    .confidence-section.visible { display: block; }
+    .conf-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 12px; }
+    .conf-scale { display: flex; gap: 7px; }
+    .conf-btn { flex: 1; padding: 11px 4px; border: 2px solid var(--border); border-radius: 8px; background: var(--surface); cursor: pointer; font-family: var(--font-body); font-size: 16px; font-weight: 600; color: var(--text-muted); transition: all 0.16s ease; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+    .conf-btn:hover { border-color: var(--navy); color: var(--navy); }
+    .conf-btn.selected { background: var(--navy); border-color: var(--navy); color: #fff; }
+    .conf-ends { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-top: 7px; padding: 0 2px; }
+    .next-wrap { display: none; margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--border); animation: fadeUp 0.25s ease both; }
+    .next-wrap.visible { display: block; }
+    .success-circle { width: 68px; height: 68px; background: var(--green-light); border: 2px solid var(--green-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; margin: 0 auto 22px; }
+    .debrief-box { background: var(--blue-info); border: 1px solid var(--blue-border); border-radius: 10px; padding: 20px 22px; margin-top: 14px; }
+    .debrief-box .debrief-heading { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--blue-text); margin-bottom: 10px; }
+    .debrief-box p { color: var(--blue-text); font-size: 14px; margin-bottom: 0; }
+    .screen-footer { text-align: center; color: var(--text-muted); font-size: 12px; margin-top: 28px; line-height: 1.6; }
+    .screen-footer strong { color: var(--text); }
+    .divider { height: 1px; background: var(--border); margin: 18px 0; }
+    #submission-status { text-align: center; font-size: 13px; color: var(--text-muted); margin-top: 20px; padding: 12px; border-radius: 8px; background: var(--bg); border: 1px solid var(--border); }
+    #submission-status.success { background: var(--green-light); border-color: var(--green-border); color: var(--green); font-weight: 500; }
+    #submission-status.error { background: var(--red-light); border-color: var(--red-border); color: var(--red); }
+
+    /* Scenario screen styles */
+    .domain-pills { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+    .domain-pill { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--green-light); border: 1px solid var(--green-border); border-radius: 8px; font-size: 14px; font-weight: 600; color: var(--green); font-family: monospace; letter-spacing: 0.03em; }
+    .warn-box { padding: 14px 16px; background: var(--red-light); border: 1px solid var(--red-border); border-radius: 8px; font-size: 13.5px; color: var(--red); line-height: 1.55; }
+
+    /*Information Letter styles */
+    .info-letter { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; margin-bottom: 14px; }
+    .info-letter-header { background: var(--navy); color: #fff; padding: 20px 28px; }
+    .info-letter-header .il-title { font-family: var(--font-display); font-size: 18px; font-weight: 600; line-height: 1.3; margin-bottom: 4px; }
+    .info-letter-header .il-sub { font-size: 12px; opacity: 0.65; letter-spacing: 0.05em; text-transform: uppercase; }
+    .info-letter-body { padding: 0 28px 24px; max-height: 480px; overflow-y: auto; scroll-behavior: smooth; }
+    .info-letter-body::-webkit-scrollbar { width: 5px; }
+    .info-letter-body::-webkit-scrollbar-track { background: var(--bg); }
+    .info-letter-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 100px; }
+    .il-section { padding: 18px 0; border-bottom: 1px solid var(--border); }
+    .il-section:last-child { border-bottom: none; }
+    .il-section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--navy); margin-bottom: 8px; display: flex; align-items: center; gap: 7px; }
+    .il-section-title::before { content: ''; display: inline-block; width: 3px; height: 14px; background: var(--navy); border-radius: 2px; flex-shrink: 0; }
+    .il-section p { font-size: 13.5px; color: var(--text-muted); margin-bottom: 6px; line-height: 1.6; }
+    .il-section p:last-child { margin-bottom: 0; }
+    .il-data-list { list-style: none; margin-top: 6px; }
+    .il-data-list li { font-size: 13.5px; color: var(--text-muted); padding: 4px 0 4px 18px; position: relative; line-height: 1.5; }
+    .il-data-list li::before { content: '—'; position: absolute; left: 0; color: var(--navy); font-weight: 700; }
+    .scroll-prompt { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; background: var(--blue-info); border-top: 1px solid var(--blue-border); font-size: 12.5px; color: var(--blue-text); font-weight: 500; }
+    .scroll-prompt.hidden { display: none; }
+
+    /* Age range picker */
+    .age-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+    @media (max-width: 380px) { .age-grid { grid-template-columns: repeat(2, 1fr); } }
+    .age-btn { padding: 11px 6px; border: 2px solid var(--border); border-radius: 9px; background: var(--surface); font-family: var(--font-body); font-size: 14px; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: all 0.16s ease; text-align: center; }
+    .age-btn:hover { border-color: var(--navy); color: var(--navy); background: var(--blue-info); }
+    .age-btn.selected { background: var(--navy); border-color: var(--navy); color: #fff; }
+    .age-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+
+<!-- LIGHTBOX -->
+<div id="lightbox" onclick="closeLightbox()">
+  <button id="lightbox-close" onclick="closeLightbox()" aria-label="Close">&#x2715;</button>
+  <img id="lightbox-img" src="" alt="Email enlarged view">
+</div>
+
+
+<!-- PARTICIPANT INFORMATION LETTER-->
+<div id="screen-pil" class="screen active">
+  <div class="container">
+    <div class="badge"><span class="badge-dot"></span>Before you begin please read carefully</div>
+    <h1 style="font-size: clamp(24px, 4.5vw, 36px); margin-bottom: 10px;">Participant Information Letter</h1>
+    <p style="margin-bottom: 18px;">Please read this information in full before deciding whether to take part.</p>
+
+    <div class="info-letter">
+      <div class="info-letter-header">
+        <div class="il-title">The impact of user training when only utilizing broad indicators: Web based Phishing simulation</div>
+        <div class="il-sub">MCAST — BSc (Hons) Cybersecurity &nbsp;·&nbsp; Nathan Lee Arpa</div>
+      </div>
+
+      <div id="il-scroll-prompt" class="scroll-prompt">&#x25BC; Scroll to read the full letter</div>
+
+      <div class="info-letter-body" id="il-body" onscroll="checkILScroll()">
+
+        <div class="il-section">
+          <div class="il-section-title">Purpose of the Study</div>
+          <p>This research intends to determine whether different types of phishing awareness training, based on indicators, have an effect on the likelihood of an individual falling for a phishing attack.</p>
+        </div>
+
+        <div class="il-section">
+          <div class="il-section-title">Why have I been chosen?</div>
+          <p>You are part of the demographic that this study is targeted towards, and a diverse set of individuals is required for this study.</p>
+        </div>
+
+        <div class="il-section">
+          <div class="il-section-title">Do I have to take part?</div>
+          <p>It is entirely up to you to decide whether or not to take part. If you decide to take part you will be asked to confirm your agreement via a consent form on the following page. You may withdraw at any time before clicking the final submit button.</p>
+        </div>
+
+        <div class="il-section">
+          <div class="il-section-title">What will happen if I take part?</div>
+          <ul class="il-data-list">
+            <li>Watch an approximately 5-minute training video that explains how to identify phishing emails.</li>
+            <li>Complete a simulation where you will be shown a number of different emails.</li>
+            <li>Make decisions about whether each email is phishing or legitimate.</li>
+            <li>Indicate your confidence level in each answer.</li>
+          </ul>
+        </div>
+
+        <div class="il-section">
+          <div class="il-section-title">Data Collected</div>
+          <ul class="il-data-list">
+            <li>Whether you identified each email correctly.</li>
+            <li>Your confidence level for each decision.</li>
+            <li>Time taken to submit each answer.</li>
+            <li>Your age range.</li>
+          </ul>
+          <p style="margin-top:10px;"><strong style="color:var(--navy);">No personally identifiable information will be collected.</strong> Since any data you submit cannot identify you, deleting your specific simulation data is not technically feasible — you cannot be identified within the dataset. You may withdraw at any time during the simulation; no unsubmitted data will be recorded.</p>
+        </div>
+
+        <div class="il-section">
+          <div class="il-section-title">Possible Risks</div>
+          <p>There are no disadvantages or risks foreseen in taking part in this study.</p>
+        </div>
+
+        <div class="il-section">
+          <div class="il-section-title">Possible Benefits</div>
+          <p>By taking part you will be contributing to the improvement of phishing training and will also be able to improve your own phishing detection skills through the training and practice provided during the simulation.</p>
+        </div>
+
+        <div class="il-section">
+          <div class="il-section-title">Confidentiality</div>
+          <p>No personal information will be collected. All other information collected from your submission will be kept strictly confidential and accessible only to the researcher and supervising mentor. Data may be retained and published in anonymised form. Results will not be attributed to you in any identifiable way.</p>
+        </div>
+
+        <div class="il-section">
+          <div class="il-section-title">What if something goes wrong?</div>
+          <p>If you have any concerns about the way you have been approached or treated, please contact:</p>
+          <ul class="il-data-list">
+            <li>Researcher: <strong style="color:var(--navy);">Nathan.arpa.e23447@mcast.edu.mt</strong></li>
+            <li>Mentor: <strong style="color:var(--navy);">Alvin.Cardona@mcast.edu.mt</strong></li>
+          </ul>
+        </div>
+
+        <div class="il-section">
+          <div class="il-section-title">Results</div>
+          <p>The results will be written up into a dissertation for the final project of a Bachelor's degree in Cybersecurity at MCAST.</p>
+        </div>
+
+      </div><!-- /info-letter-body -->
+    </div><!-- /info-letter -->
+
+    <button class="btn btn-primary" id="btn-pil-continue" onclick="showScreen('consent')">I have read this letter. Continue</button>
+    <div class="screen-footer">Questions before you start? Contact the researcher:<br><strong>nathan.arpa.e23447@mcast.edu.mt</strong></div>
+  </div>
+</div>
+
+
+<!-- ════ SCREEN CONSENT — CONSENT & AGE RANGE ════ -->
+<div id="screen-consent" class="screen">
+  <div class="container">
+    <h1>Consent and Eligibility</h1>
+    <p>Please complete all fields below before beginning the study.</p>
+
+    <!-- Age Range -->
+    <div class="card">
+      <div class="age-label">Your age range</div>
+      <p style="font-size:13.5px; margin-bottom: 12px;">Select the option that applies to you. This is the only demographic information collected.</p>
+      <div class="age-grid">
+        <button class="age-btn" onclick="selectAge('18–24')">18–24</button>
+        <button class="age-btn" onclick="selectAge('25–34')">25–34</button>
+        <button class="age-btn" onclick="selectAge('35–44')">35–44</button>
+        <button class="age-btn" onclick="selectAge('45–54')">45–54</button>
+        <button class="age-btn" onclick="selectAge('55–64')">55–64</button>
+        <button class="age-btn" onclick="selectAge('65+')">65+</button>
+      </div>
+    </div>
+
+    <!-- Consent checkboxes -->
+    <div class="card">
+      <h3>Please confirm all of the following before continuing</h3>
+      <div class="consent-item">
+        <input type="checkbox" id="c-age" onchange="checkConsent()">
+        <label for="c-age">I confirm that I am aged <strong>18 or above</strong>.</label>
+      </div>
+      <div class="consent-item">
+        <input type="checkbox" id="c-voluntary" onchange="checkConsent()">
+        <label for="c-voluntary">I understand that my participation is entirely voluntary and I can withdraw at any point before clicking the final submit button.</label>
+      </div>
+      <div class="consent-item">
+        <input type="checkbox" id="c-privacy" onchange="checkConsent()">
+        <label for="c-privacy">I understand that my responses will be stored anonymously. No personal data, including my IP address, will be collected or stored by the researcher.</label>
+      </div>
+      <div class="consent-item">
+        <input type="checkbox" id="c-use" onchange="checkConsent()">
+        <label for="c-use">I agree for my anonymised data to be used for research purposes as part of a Bachelor's dissertation at MCAST.</label>
+      </div>
+      <div class="consent-item">
+        <input type="checkbox" id="c-pil" onchange="checkConsent()">
+        <label for="c-pil">I confirm that I have read and understood the <strong>Participant Information Letter</strong> on the previous page.</label>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="btn-start" disabled onclick="startStudy()">I agree. Begin the Study</button>
+    <div class="screen-footer">Questions before you start? Contact the researcher:<br><strong>nathan.arpa.e23447@mcast.edu.mt</strong></div>
+  </div>
+</div>
+
+
+<!-- SCREEN 1 TRAINING VIDEO-->
+<div id="screen-1" class="screen">
+  <div class="container">
+    <div class="badge"><span class="badge-dot"></span>Step 1 of 3 — Training</div>
+    <h2>Your training material</h2>
+    <p>Please watch this video in full. The continue button will unlock automatically after enough time has passed.</p>
+    <div class="video-notice">
+      <span class="vc-icon">&#x2139;</span>
+      Your training material has been assigned based on your participation group. Please do not share which video you received with other potential participants.
+    </div>
+    <div class="video-wrap">
+      <iframe id="training-video" src="" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+    </div>
+    <div id="video-timer-pill">&#x23F1; Continue available in <span id="video-countdown">60</span>s</div>
+    <button class="btn btn-primary" id="btn-video-continue" disabled onclick="goToInstructions()">Continue to Email Task</button>
+  </div>
+</div>
+
+
+<!--SCREEN 2 TASK INSTRUCTIONS -->
+<div id="screen-2" class="screen">
+  <div class="container">
+    <div class="badge"><span class="badge-dot"></span>Step 2 of 3 — Instructions</div>
+    <h2>Email assessment task</h2>
+    <p>You will now review <strong id="email-count-display">10</strong> emails, one at a time. For each email, follow these steps:</p>
+    <div class="card">
+     <ul class="step-list">
+  <li><span>Read the email as you normally would if it appeared in your inbox</span></li>
+  <li><span>Decide whether it is <strong>phishing</strong> (suspicious, fraudulent) or <strong>legitimate</strong> (a genuine email), then click the corresponding button.</span></li>
+  <li><span>Rate your <strong>confidence</strong> in that decision on a scale from 1 (not confident at all) to 5 (very confident).</span></li>
+  <li><span>Click <strong>Next Email</strong> to move on. You cannot go back to a previous email.</span></li>
+</ul>
+    </div>
+    <div class="card card-sm" style="background: var(--bg);">
+      <p style="margin:0; font-size:14px;">&#x23F1; <strong>There is no time limit.</strong> Your decision speed is recorded automatically in the background, take as long as you naturally would.</p>
+    </div>
+    <button class="btn btn-primary" onclick="showScreen(3)">Continue</button>
+  </div>
+</div>
+
+
+<!--SCREEN 3 SCENARIO BRIEFING-->
+<div id="screen-3" class="screen">
+  <div class="container">
+    <div class="badge"><span class="badge-dot"></span>Step 2b of 3 — Your Scenario</div>
+    <h2>Your scenario</h2>
+    <p>Before you begin reviewing emails, please read the following context carefully.</p>
+
+    <div class="card">
+      <h3>Scenario</h3>
+      <p>
+        In this scenario you are <strong>Sarah</strong>, an employee at <strong>CompanyA</strong>.
+        You will be going through a variety of emails and you are to determine whether they are
+        phishing or legitimate. Please note that user profile icons do not have any indications of legitimacy in this survey.
+      </p>
+
+      <div class="divider"></div>
+
+      <h3>Legitimate company email addresses</h3>
+      <p style="margin-bottom: 12px;">The following are the <strong>only</strong> official email addresses used internally by CompanyA, make sure to take a good look at them:</p>
+
+      <div class="domain-pills">
+        <div class="domain-pill"><span>&#x2713;</span> HR@companya.com</div>
+        <div class="domain-pill"><span>&#x2713;</span> ITsupport@companya.com</div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="startEmailTask()">I understand. Start the Emails</button>
+  </div>
+</div>
+
+
+<!-- SCREEN 4 EMAIL ASSESSMENT LOOP -->
+<div id="screen-4" class="screen">
+  <div class="container-wide">
+    <div class="progress-header">
+      <div class="badge" style="margin-bottom:0">
+        <span class="badge-dot"></span>
+        Email <span id="email-num">1</span> of <span id="email-total">10</span>
+      </div>
+      <span class="progress-pct" id="progress-pct">0% complete</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+
+    <div class="card" style="padding: 16px;">
+      <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 10px;">Review this email</div>
+      <div class="email-image-container" id="email-image-container">
+        <div class="email-img-loading" id="email-loading-msg">Loading email...</div>
+        <img id="email-img" src="" alt="Email to assess" style="display:none;"
+          onload="onEmailImageLoaded()" onerror="onEmailImageError()" onclick="openLightbox(this.src)">
+      </div>
+      <div class="zoom-hint" id="zoom-hint" style="display:none;"
+        onclick="openLightbox(document.getElementById('email-img').src)">
+        &#x1F50D; Click image to enlarge
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 12px;">Is this email phishing or legitimate?</div>
+      <div class="classify-row">
+        <button class="btn-classify btn-phishing" id="btn-phishing" onclick="selectChoice('phishing')">
+          <span class="cls-icon">&#x26A0;&#xFE0F;</span>Phishing<span class="cls-sub">Suspicious / Fraudulent</span>
+        </button>
+        <button class="btn-classify btn-legit" id="btn-legit" onclick="selectChoice('legitimate')">
+          <span class="cls-icon">&#x2705;</span>Legitimate<span class="cls-sub">Genuine email</span>
+        </button>
+      </div>
+      <div class="confidence-section" id="confidence-section">
+        <div class="conf-title">How confident are you in this decision?</div>
+        <div class="conf-scale" id="conf-scale">
+          <button class="conf-btn" onclick="selectConfidence(1)">1</button>
+          <button class="conf-btn" onclick="selectConfidence(2)">2</button>
+          <button class="conf-btn" onclick="selectConfidence(3)">3</button>
+          <button class="conf-btn" onclick="selectConfidence(4)">4</button>
+          <button class="conf-btn" onclick="selectConfidence(5)">5</button>
+        </div>
+        <div class="conf-ends"><span>Not confident</span><span>Very confident</span></div>
+      </div>
+      <div class="next-wrap" id="next-wrap">
+        <button class="btn btn-primary" id="btn-next" onclick="nextEmail()">Next Email</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- SCREEN 5 THANK YOU & DEBRIEF-->
+<div id="screen-5" class="screen">
+  <div class="container" style="text-align:center;">
+    <div class="success-circle">&#x2713;</div>
+    <h2>Thank you for participating!</h2>
+    <p>Your responses have been submitted.</p>
+    <div id="submission-status">Submitting your responses, please wait...</div>
+    <div class="debrief-box" style="text-align:left; margin-top: 22px;">
+      <div class="debrief-heading">Study Debrief</div>
+      <p>This study compared two types of phishing awareness training. One type teaches <strong>broad indicators</strong> which are cues present in almost all phishing emails, such as suspicious sender addresses and a sense of urgency. The other teaches <strong>both broad and specific indicators</strong> — including cues like misspellings and distorted logos that appear in only some phishing emails.</p>
+      <p style="margin-top:10px;">Your training was randomly assigned at the start of the session. The aim of the research is to determine which approach better equips people to detect phishing emails, especially sophisticated ones that lack the obvious specific cues.</p>
+      <p style="margin-top:10px;">If you have any questions about the study, please contact the researcher at <strong>nathan.arpa.e23447@mcast.edu.mt</strong></p>
+    </div>
+    <div class="card" style="text-align:left; margin-top: 14px;">
+      <h3>Want to improve your phishing awareness?</h3>
+      <p>Visit the <a href="https://support.microsoft.com/en-us/security/protect-yourself-from-phishing" target="_blank" rel="noopener">Microsoft Phishing Guide</a> for free, practical advice on spotting suspicious emails.</p>
+    </div>
+  </div>
+</div>
+
+
+<script>
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzRmE9k2k3pGdH0-lvu3ery5XAsnPBwEsH-bAR6sHNs34XDV4JWsHWxSmBev3b6PTIysQ/exec';
+const VIDEOS = {
+  A: 'https://www.youtube.com/embed/VxlvlEkO8T8?si=MgDnFBzBW0BcWhlj',
+  B: 'https://www.youtube.com/embed/XzRP-1GL0js?si=mq8DIp2523CU2pnt'
+};
+const EMAILS = [
+  { id: 'email_01', src: 'emails/LgLogEs.png',              truth: 'legitimate' }, //Legitimate  login  easy
+  { id: 'email_02', src: 'emails/LgLeEs.png',              truth: 'legitimate' }, //Legitimate leave easy
+  { id: 'email_03', src: 'emails/pgLgEs.png',                truth: 'phishing'   }, //phishingLoginEasy.png
+  { id: 'email_04', src: 'emails/PglgEsDistLo.png',   truth: 'phishing'   },//emails/PhishingloginEasyDistortedLogo.png
+  { id: 'email_05', src: 'emails/pgVoMe.png',            truth: 'phishing'   },//emails/phishingVoucherMedium.png
+  { id: 'email_06', src: 'emails/LgMe.png',                 truth: 'legitimate' },//emails/LegitimateMedium.png
+  { id: 'email_07', src: 'emails/PgSyiHa.png',      truth: 'phishing'   },//emails/PhishingSystemMigrationHard.png
+  { id: 'email_08', src: 'emails/LgMaes.png',        truth: 'legitimate' },//emails/LegitimateMaintenanceeasy.png
+  { id: 'email_09', src: 'emails/PgChPaHa.png',       truth: 'phishing'   },//emails/PhishingChangePasswordHard.png
+  { id: 'email_10', src: 'emails/LgEs.png',                   truth: 'legitimate' },//emails/LegitimateEasy.png
+];
+const VIDEO_WAIT_SECONDS = 1;
+
+const state = {
+  participantID:     crypto.randomUUID(),
+  group:             Math.random() < 0.5 ? 'A' : 'B',
+  ageRange:          null,
+  emails:            shuffle([...EMAILS]),
+  currentIndex:      0,
+  emailStartTime:    null,
+  responses:         [],
+  currentChoice:     null,
+  currentConfidence: null
+};
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function showScreen(n) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + n).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* Information Letter scroll detection */
+function checkILScroll() {
+  const body = document.getElementById('il-body');
+  const prompt = document.getElementById('il-scroll-prompt');
+  const nearBottom = body.scrollTop + body.clientHeight >= body.scrollHeight - 60;
+  if (nearBottom) prompt.classList.add('hidden');
+}
+
+/* Age range selection*/
+function selectAge(range) {
+  state.ageRange = range;
+  document.querySelectorAll('.age-btn').forEach(btn => {
+    btn.classList.toggle('selected', btn.textContent === range);
+  });
+  checkConsent();
+}
+
+/*Lightbox*/
+function openLightbox(src) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+/*Consent gate: all 5 checkboxes + age range must be set*/
+function checkConsent() {
+  const allChecked = ['c-age','c-voluntary','c-privacy','c-use','c-pil']
+    .every(id => document.getElementById(id).checked);
+  const ageSelected = state.ageRange !== null;
+  document.getElementById('btn-start').disabled = !(allChecked && ageSelected);
+}
+
+function startStudy() {
+  document.getElementById('training-video').src = VIDEOS[state.group];
+  showScreen(1);
+  startVideoCountdown();
+}
+
+function startVideoCountdown() {
+  let remaining = VIDEO_WAIT_SECONDS;
+  const countdownEl = document.getElementById('video-countdown');
+  if (remaining <= 0) { unlockVideo(); return; }
+  countdownEl.textContent = remaining;
+  const timer = setInterval(() => {
+    remaining--;
+    countdownEl.textContent = remaining;
+    if (remaining <= 0) { clearInterval(timer); unlockVideo(); }
+  }, 1000);
+}
+
+function unlockVideo() {
+  const pill = document.getElementById('video-timer-pill');
+  pill.classList.add('ready');
+  pill.innerHTML = '&#x2713; You may continue when you have finished watching.';
+  document.getElementById('btn-video-continue').disabled = false;
+}
+
+function goToInstructions() {
+  document.getElementById('training-video').src = '';
+  document.getElementById('email-count-display').textContent = state.emails.length;
+  showScreen(2);
+}
+
+function startEmailTask() {
+  showScreen(4);
+  loadEmail(0);
+}
+
+function loadEmail(index) {
+  const email = state.emails[index];
+  const total = state.emails.length;
+  state.currentChoice = null;
+  state.currentConfidence = null;
+  state.emailStartTime = null;
+  document.getElementById('btn-phishing').classList.remove('selected');
+  document.getElementById('btn-legit').classList.remove('selected');
+  document.querySelectorAll('.conf-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('confidence-section').classList.remove('visible');
+  document.getElementById('next-wrap').classList.remove('visible');
+  document.getElementById('zoom-hint').style.display = 'none';
+  const pct = Math.round((index / total) * 100);
+  document.getElementById('email-num').textContent     = index + 1;
+  document.getElementById('email-total').textContent   = total;
+  document.getElementById('progress-pct').textContent  = pct + '% complete';
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('btn-next').textContent = index === total - 1 ? 'Submit Responses' : 'Next Email';
+  const img     = document.getElementById('email-img');
+  const loadMsg = document.getElementById('email-loading-msg');
+  img.style.display     = 'none';
+  loadMsg.style.display = 'block';
+  loadMsg.className     = 'email-img-loading';
+  loadMsg.textContent   = 'Loading email...';
+  img.src = email.src;
+}
+
+function onEmailImageLoaded() {
+  document.getElementById('email-img').style.display          = 'block';
+  document.getElementById('email-loading-msg').style.display  = 'none';
+  document.getElementById('zoom-hint').style.display          = 'flex';
+  state.emailStartTime = Date.now();
+}
+
+function onEmailImageError() {
+  const loadMsg = document.getElementById('email-loading-msg');
+  loadMsg.className = 'email-img-error';
+  loadMsg.innerHTML = '<strong>Image could not be loaded.</strong>Check that the file exists in the <code>emails/</code> folder and the filename in EMAILS[] is correct.';
+  state.emailStartTime = Date.now();
+}
+
+function selectChoice(choice) {
+  state.currentChoice = choice;
+  document.getElementById('btn-phishing').classList.toggle('selected', choice === 'phishing');
+  document.getElementById('btn-legit').classList.toggle('selected',    choice === 'legitimate');
+  document.getElementById('confidence-section').classList.add('visible');
+}
+
+function selectConfidence(level) {
+  state.currentConfidence = level;
+  document.querySelectorAll('.conf-btn').forEach((btn, i) => {
+    btn.classList.toggle('selected', i + 1 === level);
+  });
+  document.getElementById('next-wrap').classList.add('visible');
+}
+
+function nextEmail() {
+  const responseTimeMs = Date.now() - state.emailStartTime;
+  const email = state.emails[state.currentIndex];
+  state.responses.push({
+    participantID:  state.participantID,
+    group:          state.group,
+    ageRange:       state.ageRange,          // ← age range included per response row
+    emailID:        email.id,
+    truth:          email.truth,
+    userChoice:     state.currentChoice,
+    responseTimeMs: responseTimeMs,
+    confidence:     state.currentConfidence
+  });
+  state.currentIndex++;
+  if (state.currentIndex < state.emails.length) {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    loadEmail(state.currentIndex);
+  } else {
+    showScreen(5);
+    submitData();
+  }
+}
+
+async function submitData() {
+  const statusEl = document.getElementById('submission-status');
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(state.responses)
+    });
+    statusEl.className   = 'success';
+    statusEl.textContent = 'Responses submitted. Thank you!';
+  } catch (err) {
+    statusEl.className = 'error';
+    statusEl.innerHTML = 'Could not submit responses (network error). <a href="#" onclick="downloadFallback(event)">Download your data as JSON</a> and email it to the researcher.';
+    console.error('Submission error:', err);
+  }
+}
+
+function downloadFallback(e) {
+  if (e) e.preventDefault();
+  const json = JSON.stringify(state.responses, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'study_data_' + state.participantID.slice(0, 8) + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>

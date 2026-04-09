@@ -472,7 +472,12 @@ const state = {
   emailStartTime:    null,
   responses:         [],
   currentChoice:     null,
-  currentConfidence: null
+  currentConfidence: null,
+  consent_18plus:        false,
+  consent_voluntary:     false,
+  consent_privacy:       false,
+  consent_dataUse:       false,
+  consent_readPIL:       false
 };
 
 function shuffle(arr) {
@@ -527,6 +532,11 @@ function checkConsent() {
 }
 
 function startStudy() {
+  state.consent_18plus    = document.getElementById('c-age').checked;
+  state.consent_voluntary = document.getElementById('c-voluntary').checked;
+  state.consent_privacy   = document.getElementById('c-privacy').checked;
+  state.consent_dataUse   = document.getElementById('c-use').checked;
+  state.consent_readPIL   = document.getElementById('c-pil').checked;
   document.getElementById('training-video').src = VIDEOS[state.group];
   showScreen(1);
   startVideoCountdown();
@@ -624,12 +634,17 @@ function nextEmail() {
   state.responses.push({
     participantID:  state.participantID,
     group:          state.group,
-    ageRange:       state.ageRange,          // ← age range included per response row
+    ageRange:       state.ageRange,          
     emailID:        email.id,
     truth:          email.truth,
     userChoice:     state.currentChoice,
     responseTimeMs: responseTimeMs,
-    confidence:     state.currentConfidence
+    confidence:     state.currentConfidence,
+    consent_18plus:     state.consent_18plus,
+    consent_voluntary:  state.consent_voluntary,
+    consent_privacy:    state.consent_privacy,
+    consent_dataUse:    state.consent_dataUse,
+    consent_readPIL:    state.consent_readPIL
   });
   state.currentIndex++;
   if (state.currentIndex < state.emails.length) {

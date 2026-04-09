@@ -450,8 +450,8 @@ const VIDEOS = {
   B: 'https://www.youtube.com/embed/XzRP-1GL0js?si=mq8DIp2523CU2pnt'
 };
 const EMAILS = [
-  { id: 'email_01', src: 'emails/LgLogEs2.png',              truth: 'legitimate' }, //Legitimate  login  easy
-  { id: 'email_02', src: 'emails/LgLeEs.png',              truth: 'legitimate' }, //Legitimate leave easy
+  { id: 'email_01', src: 'emails/LgLogEs.png',              truth: 'legitimate' }, //Legitimate  login  easy
+  { id: 'email_02', src: 'emails/LgLeEs2.png',              truth: 'legitimate' }, //Legitimate leave easy
   { id: 'email_03', src: 'emails/pgLgEs.png',                truth: 'phishing'   }, //phishingLoginEasy.png
   { id: 'email_04', src: 'emails/PglgEsDistLo.png',   truth: 'phishing'   },//emails/PhishingloginEasyDistortedLogo.png
   { id: 'email_05', src: 'emails/pgVoMe.png',            truth: 'phishing'   },//emails/phishingVoucherMedium.png
@@ -538,7 +538,7 @@ function startStudy() {
   state.consent_dataUse   = document.getElementById('c-use').checked;
   state.consent_readPIL   = document.getElementById('c-pil').checked;
   document.getElementById('training-video').src = VIDEOS[state.group];
-  showScreen(1);
+  showScreen(300);
   startVideoCountdown();
 }
 

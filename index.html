@@ -461,7 +461,7 @@ const EMAILS = [
   { id: 'email_09', src: 'emails/PgChPaHa.png',       truth: 'phishing'   },//emails/PhishingChangePasswordHard.png
   { id: 'email_10', src: 'emails/LgEs.png',                   truth: 'legitimate' },//emails/LegitimateEasy.png
 ];
-const VIDEO_WAIT_SECONDS = 1;
+const VIDEO_WAIT_SECONDS = 300;
 
 const state = {
   participantID:     crypto.randomUUID(),
@@ -538,7 +538,7 @@ function startStudy() {
   state.consent_dataUse   = document.getElementById('c-use').checked;
   state.consent_readPIL   = document.getElementById('c-pil').checked;
   document.getElementById('training-video').src = VIDEOS[state.group];
-  showScreen(300);
+  showScreen(1);
   startVideoCountdown();
 }
 

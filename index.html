@@ -51,6 +51,7 @@
     #video-timer-pill { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 100px; font-size: 13px; color: var(--text-muted); margin-bottom: 14px; transition: all 0.3s ease; }
     #video-timer-pill.ready { background: var(--green-light); border-color: var(--green-border); color: var(--green); }
     #video-countdown { font-weight: 600; color: var(--navy); }
+    .video-note { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; background: #FFFBEB; border: 1px solid #F5D87A; border-radius: 10px; margin-bottom: 14px; }
     .step-list { list-style: none; counter-reset: steps; }
     .step-list li { counter-increment: steps; display: flex; align-items: flex-start; gap: 14px; padding: 13px 0; border-bottom: 1px solid var(--border); font-size: 14.5px; color: var(--text-muted); line-height: 1.55; }
     .step-list li:last-child { border-bottom: none; padding-bottom: 0; }
@@ -306,6 +307,9 @@
     </div>
     <div class="video-wrap">
       <iframe id="training-video" src="" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+    </div>
+    <div class="video-note">
+      <p><strong>Note:</strong> Regarding Indicator 2 - Domains, most modern email clients normalize anything after the @ to lowercase, so this tactic usually uses other different methods, such as replacing the letter "o" with a "0" (Zero)</p>
     </div>
     <div id="video-timer-pill">&#x23F1; Continue available in <span id="video-countdown">60</span>s</div>
     <button class="btn btn-primary" id="btn-video-continue" disabled onclick="goToInstructions()">Continue to Email Task</button>
